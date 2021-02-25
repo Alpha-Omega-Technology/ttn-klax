@@ -10,20 +10,20 @@ var REGISTER_RAW = false;
 // Enable debug console.log
 var DEBUG = true;
 // Use legacy output format, enables old output format for more modern Klax
-var LEGACY_FORMAT = false;
+var LEGACY_FORMAT = true;
 
 function debug(msg) {
   if(DEBUG) {
-    console.log('[DEBUG] ' + msg);
+//    console.log('[DEBUG] ' + msg);
   }
 }
 
 function warning(msg) {
-  console.log('[WARNING] ' + msg);
+//  console.log('[WARNING] ' + msg);
 }
 
 function error(msg) {
-  console.log('[ERROR] ' + msg);
+//  console.log('[ERROR] ' + msg);
 }
 
 var SML_KLAX = "SML Klax";
@@ -52,19 +52,17 @@ var MODBUS_MODES = [
 function parseHeader(data) {
   var version = (data[0] & 0xfc) >> 2;
   var deviceType = KLAX_TYPES[data[0] & 0x3];
-  if (deviceType == SML_KLAX) {
-    if (version > 0) {
-      var batteryPerc = (data[1] & 0x7) * 20;
-      var readMode = (data[1] & 0x38) >> 3;
-    } else {
-      var batteryPerc = (data[1] & 0xf) * 10;
-      var readMode = (data[1] & 0x30) >> 4;
-    }
-    var meterType = METER_TYPES[readMode];
+  if (version > 0) {
+    var batteryPerc = (data[1] & 0x7) * 20;
+    var readMode = (data[1] & 0x38) >> 3;
   } else {
     var batteryPerc = (data[1] & 0xf) * 10;
-    var modbusMode = (data[1] & 0x30) >> 4;
-    var meterType = MODBUS_MODES[modbusMode];
+    var readMode = (data[1] & 0x30) >> 4;
+  }
+  if (deviceType == SML_KLAX) {
+    var meterType = METER_TYPES[readMode];
+  } else {
+    var meterType = MODBUS_MODES[readMode];
   }
   var configured = (data[1] & 0x40) > 0;
   var connTest = (data[1] & 0x80) > 0;
@@ -122,8 +120,8 @@ function decodeInt32BE(data) {
   return decodeIntN(data, 32, true);
 }
 
-IEE754_FLOAT_MANTISSA_BITS = 23
-IEE754_FLOAT_EXPONENT_BITS = 8
+var IEE754_FLOAT_MANTISSA_BITS = 23;
+var IEE754_FLOAT_EXPONENT_BITS = 8;
 
 function decodeIEE754FloatBE(data) {
   var mantissa = data[3] | (data[2] << 8) | ((data[1] & 0x7f) << 16);
@@ -149,8 +147,8 @@ function decodeIEE754FloatBE(data) {
   }
 }
 
-IEE754_DOUBLE_MANTISSA_BITS = 52
-IEE754_DOUBLE_EXPONENT_BITS = 11
+var IEE754_DOUBLE_MANTISSA_BITS = 52;
+var IEE754_DOUBLE_EXPONENT_BITS = 11;
 
 function decodeIEE754DoubleBE(data) {
   var mantissa = data[7] | (data[6] << 8) | (data[5] << 16) | (data[4] << 24);
